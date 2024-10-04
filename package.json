@@ -1,0 +1,26 @@
+{
+  "name": "mystica-api",
+  "version": "1.0.0",
+  "description": "This project is the API to handle requests from the Front-end",
+  "main": "app.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Drdrakin/mystica-api.git"
+  },
+  "keywords": [
+    "Avatar",
+    "API"
+  ],
+  "author": "Guilherme Alves",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Drdrakin/mystica-api/issues"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "mysql2": "^3.11.3"
+  }
+}
