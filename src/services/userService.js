@@ -1,8 +1,9 @@
 import database from '../repository/index.js';
 
-//TESTAR
 async function createUser(firstName, lastName, birthday, email, password) {
     const conn = await database.connect();
+
+    console.log("Foi aqui")
 
     const data = [firstName, lastName, birthday, email, password];
     const sql = "insert into users(user_first_name, user_last_name, user_birthday, user_email, user_password) values(?,?,?,?,?)";
@@ -14,24 +15,23 @@ async function createUser(firstName, lastName, birthday, email, password) {
     }
 }
 
-//TESTAR
 async function login(email, password) {
     const conn = await database.connect();
 
-    const data = [email, password];
-    const sql = "select * from users WHERE email = ?";
+    const sql = "select * from users WHERE user_email = ?";
 
     try {
-        const users = await conn.query(sql, data);
+        const users = await conn.query(sql, email);
 
-        const user = users[0];
 
-        if (user.length === 0) {
+        if (users.length === 0) {
             conn.end();
             throw new Error("Usuário não encontrado.");
         }
 
-        if (password != user.user_password) {
+        const user = users[0];
+
+        if (password != user[0].user_password) {
             conn.end();
             throw new Error("Senha incorreta.");
         }

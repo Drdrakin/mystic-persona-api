@@ -5,7 +5,7 @@ const routes = express.Router();
 
 routes.post('/register', async (req, res) => {
     const { firstName, lastName, birthday, email, password } = req.body;
-
+    
     try {
 
         await service.createUser(firstName, lastName, birthday, email, password);
@@ -20,8 +20,8 @@ routes.post('/login', async (req, res) => {
     const { email, password } = req.body;
     
     try {
-        const { token, user } = await service.login(email, password);
-        res.status(200).send({ message: 'Login bem-sucedido!', token, user });
+        await service.login(email, password);
+        res.status(200).send({ message: 'Login bem-sucedido!' });
     } catch (err) {
         res.status(401).send({ message: err.message });
     }
