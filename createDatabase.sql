@@ -1,8 +1,8 @@
-create database mystica_db;
+create if not exists database mystica_db;
 
 use mystica_db;
 
-create table users(
+create table if not exists users(
 	user_id int auto_increment primary key,
 	user_first_name varchar(50) not null,
 	user_last_name varchar(50),

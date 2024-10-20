@@ -12,6 +12,9 @@
     "Avatar",
     "API"
   ],
+  "scripts": {
+    "docker": "docker compose up -d"
+  },
   "author": "Guilherme Alves",
   "license": "MIT",
   "bugs": {
