@@ -1,4 +1,4 @@
-create if not exists database mystica_db;
+create database if not exists mystica_db;
 
 use mystica_db;
 
