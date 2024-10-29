@@ -1,15 +1,22 @@
 import express from 'express';
 import routes from './routes.js';
 import cors from 'cors';
+import connect from './repository/index.js';
 
 const app = express();
 
 app.use(cors());
-
 app.use(express.json());
 
-app.use('/', routes);
+connect.connectMongoDB().then(() => {
+  app.use('/', routes);
 
-app.listen(3333, () => {
-    console.log('Servidor rodando na porta 3333');
+  const PORT = 3333;
+
+  app.listen(PORT, () => {
+    console.log(`Server running in port ${PORT}`);
+  });
+}).catch(err => {
+  console.error('Failed to connect to MongoDB:', err.message);
+  process.exit(1);
 });

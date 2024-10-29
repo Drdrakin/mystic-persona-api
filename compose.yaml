@@ -10,4 +10,4 @@ services:
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - ./createDatabase.sql:/docker-entrypoint-initdb.d/Database.sql
+      - ./repository/createDatabase.sql:/docker-entrypoint-initdb.d/Database.sql
