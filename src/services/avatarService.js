@@ -1,8 +1,14 @@
 import AvatarPart from '../models/AvatarPart.js';
+import { generateSignedUrl } from '../utils/googleCloudStorage.js';
 
 async function getAvatarParts() {
   try {
-    return await AvatarPart.find();
+    const parts = await AvatarPart.find();
+    const partsWithUrls = await Promise.all(parts.map(async (part) => {
+      part.imageUrl = await generateSignedUrl(part.imageUrl);
+      return part;
+    }));
+    return partsWithUrls;
   } catch (err) {
     throw new Error('Error retrieving avatar parts');
   }

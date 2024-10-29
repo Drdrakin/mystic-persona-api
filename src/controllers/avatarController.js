@@ -1,5 +1,7 @@
 import express from 'express';
 import service from '../services/avatarService.js';
+import upload from '../middleware/fileUpload.js';
+import { uploadImage } from '../utils/googleCloudStorage.js';
 
 const routes = express.Router();
 
@@ -12,9 +14,13 @@ routes.get('/', async (req, res) => {
   }
 });
 
-routes.post('/', async (req, res) => {
+routes.post('/', upload.single('image'), async (req, res) => {
   try {
-    const newPart = await service.createAvatarPart(req.body);
+    const imageUrl = await uploadImage(req.file);
+    const newPart = await service.createAvatarPart({
+      ...req.body,
+      imageUrl
+    });
     res.status(201).json(newPart);
   } catch (err) {
     res.status(500).send({ message: err.message });
