@@ -39,4 +39,26 @@ async function deleteAvatarPart(id) {
   }
 }
 
-export default { getAvatarParts, createAvatarPart, updateAvatarPart, deleteAvatarPart };
+async function getCategories() {
+  try {
+      const categories = await AvatarPart.distinct('type');
+      return categories;
+  } catch (err) {
+      throw new Error('Error retrieving categories');
+  }
+}
+
+async function getComponentsByCategory(category) {
+  try {
+    const components = await AvatarPart.find({ type: category });
+    const componentsWithSignedUrls = await Promise.all(components.map(async (component) => {
+      const signedUrl = await generateSignedUrl(component.imageUrl);
+      return { ...component._doc, imageUrl: signedUrl };
+    }));
+    return componentsWithSignedUrls;
+  } catch (err) {
+    throw new Error('Error retrieving components');
+  }
+}
+
+export default { getAvatarParts, createAvatarPart, updateAvatarPart, deleteAvatarPart, getCategories, getComponentsByCategory };

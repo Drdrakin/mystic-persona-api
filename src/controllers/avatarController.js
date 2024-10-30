@@ -5,6 +5,25 @@ import { uploadImage } from '../utils/googleCloudStorage.js';
 
 const routes = express.Router();
 
+routes.get('/categories', async (req, res) => {
+  try {
+      const categories = await service.getCategories();
+      res.json(categories);
+  } catch (err) {
+      res.status(500).send({ message: err.message });
+  }
+});
+
+routes.get('/components', async (req, res) => {
+  const { category } = req.query;
+  try {
+      const components = await service.getComponentsByCategory(category);
+      res.json(components);
+  } catch (err) {
+      res.status(500).send({ message: err.message });
+  }
+});
+
 routes.get('/', async (req, res) => {
   try {
     const parts = await service.getAvatarParts();
