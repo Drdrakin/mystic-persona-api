@@ -1,4 +1,4 @@
-import database from '../repository/index.js';
+import database from '../database/index.js';
 
 async function createUser(firstName, lastName, birthday, email, password) {
     const conn = await database.connectMySQL();
