@@ -1,3 +1,4 @@
+import sharp from 'sharp';
 import { Storage } from '@google-cloud/storage';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -16,24 +17,39 @@ const bucket = storage.bucket(bucketName);
 
 export const uploadImage = (file) => {
   return new Promise((resolve, reject) => {
-    const uniqueFilename = `${uuidv4()}-${file.originalname}`;
-    const blob = bucket.file(uniqueFilename);
-    const blobStream = blob.createWriteStream({
-      resumable: false,
-      contentType: file.mimetype
-    });
+      const uniqueFilename = `${uuidv4()}-${file.originalname}`;
+      const blob = bucket.file(uniqueFilename);
 
-    blobStream.on('error', (err) => {
-      reject(err);
-    });
+      const blobStream = blob.createWriteStream({
+          resumable: false,
+          contentType: file.mimetype,
+          metadata: {
+              cacheControl: 'public, max-age=31536000'
+          }
+      });
 
-    blobStream.on('finish', () => {
-      resolve(uniqueFilename);
-    });
+      blobStream.on('error', (err) => {
+          reject(err);
+      });
 
-    blobStream.end(file.buffer);
+      blobStream.on('finish', () => {
+          resolve(uniqueFilename);
+      });
+
+      // Sharp converts and resizes the image for faster loading
+      sharp(file.buffer)
+          .resize(200, 200)
+          .toFormat('webp')
+          .toBuffer()
+          .then(data => {
+              blobStream.end(data);
+          })
+          .catch(err => {
+              reject(err);
+          });
   });
 };
+
 
 export const generateSignedUrl = async (fileName) => {
   const options = {
