@@ -1,42 +1,42 @@
-import database from '../repository/index.js';
+import User from '../models/User.js';
+import { generateToken } from '../utils/jwtUtils.js';
 
 async function createUser(firstName, lastName, birthday, email, password) {
-    const conn = await database.connectMySQL();
-
-    const data = [firstName, lastName, birthday, email, password];
-    const sql = "insert into users(user_first_name, user_last_name, user_birthday, user_email, user_password) values(?,?,?,?,?)";
-
     try {
-        await conn.query(sql, data)
+        const user = new User({
+            firstName,
+            lastName,
+            birthday,
+            email,
+            password,
+        });
+
+        await user.save();
+        console.log("User successfully created!");
     } catch (error) {
         throw new Error(error);
     }
 }
 
 async function login(email, password) {
-    const conn = await database.connectMySQL();
-
-    const sql = "select * from users WHERE user_email = ?";
-
     try {
-        const users = await conn.query(sql, email);
+        const user = await User.findOne({ email });
 
-
-        if (users.length === 0) {
-            conn.end();
-            throw new Error("Usuário não encontrado.");
+        if (!user) {
+            throw new Error("User not found.");
         }
 
-        const user = users[0];
-
-        if (password != user[0].user_password) {
-            conn.end();
-            throw new Error("Senha incorreta.");
+        if (password !== user.password) {
+            throw new Error("Incorrect password.");
         }
 
+        const token = generateToken(user);
+
+        console.log("Login successful");
+        return token;
     } catch (error) {
         throw new Error(error);
     }
 }
 
-export default { createUser, login }
+export default { createUser, login };
