@@ -5,6 +5,16 @@ import { uploadImage } from '../utils/googleCloudStorage.js';
 
 const routes = express.Router();
 
+routes.post('/user-avatar', async (req, res) => {
+  try {
+    const savedAvatar = await service.createUserAvatar(req.body);
+    res.status(201).json(savedAvatar);
+  } catch (err) {
+    res.status(400).send({ message: err.message });
+  }
+});
+
+
 routes.get('/categories', async (req, res) => {
   try {
       const categories = await service.getCategories();

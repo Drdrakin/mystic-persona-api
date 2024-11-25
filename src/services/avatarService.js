@@ -1,18 +1,45 @@
 import AvatarPart from '../models/AvatarPart.js';
+import Avatar from '../models/Avatar.js'
 import { generateSignedUrl } from '../utils/googleCloudStorage.js';
 
 async function getAvatarParts() {
   try {
     const parts = await AvatarPart.find();
     const partsWithUrls = await Promise.all(parts.map(async (part) => {
-      part.imageUrl = await generateSignedUrl(part.imageUrl);
-      return part;
+      const signedUrl = await generateSignedUrl(part.imageUrl);
+      return { ...part._doc, imageUrl: signedUrl };
     }));
     return partsWithUrls;
   } catch (err) {
     throw new Error('Error retrieving avatar parts');
   }
 }
+
+
+async function createUserAvatar(data) {
+  const { userId, avatarParts } = data;
+
+  //Validate that data exist to not get truncated 
+  const partIds = avatarParts.map(part => part.part);
+  const validParts = await AvatarPart.find({ _id: { $in: partIds } });
+  if (validParts.length !== avatarParts.length) {
+    throw new Error('Some avatar parts are invalid.');
+  }
+
+  const newUserAvatar = {
+    userId,
+    avatarParts,
+    createdAt: new Date(),
+  };
+
+  try {
+    const savedAvatar = await Avatar.create(newUserAvatar);
+    return savedAvatar;
+  } catch (err) {
+    throw new Error('Error creating user avatar');
+  }
+}
+
 
 async function createAvatarPart(data) {
   try {
@@ -61,4 +88,4 @@ async function getComponentsByCategory(category) {
   }
 }
 
-export default { getAvatarParts, createAvatarPart, updateAvatarPart, deleteAvatarPart, getCategories, getComponentsByCategory };
+export default { getAvatarParts, createAvatarPart, updateAvatarPart, deleteAvatarPart, getCategories, getComponentsByCategory, createUserAvatar };
