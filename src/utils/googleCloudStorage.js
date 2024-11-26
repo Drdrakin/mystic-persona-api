@@ -36,7 +36,8 @@ export const uploadImage = (file) => {
           resolve(uniqueFilename);
       });
 
-      // Sharp converts and resizes the image for faster loading
+      // Sharp converts and resizes the image for faster loading and to have a 'pattern' of sorts..
+      // webp seems more compatible with web apps
       sharp(file.buffer)
           .resize(200, 200)
           .toFormat('webp')
@@ -50,14 +51,36 @@ export const uploadImage = (file) => {
   });
 };
 
+export const getImageFromCloud = async (fileName) => {
+  try {
+    const file = bucket.file(fileName);
+
+    const [exists] = await file.exists();
+    if (!exists) {
+      throw new Error("File not found in cloud storage:" + fileName);
+    }
+
+    //Download to use locally
+    const [buffer] = await file.download();
+
+    return buffer;
+  } catch (err) {
+    throw new Error("Error retrieving file from cloud:" + err.message);
+  }
+};
 
 export const generateSignedUrl = async (fileName) => {
-  const options = {
-    version: 'v4',
-    action: 'read',
-    expires: Date.now() + 30 * 60 * 1000,
-  };
-
-  const [url] = await bucket.file(fileName).getSignedUrl(options);
-  return url;
+  try {
+    const options = {
+      version: 'v4',
+      action: 'read',
+      expires: Date.now() + 30 * 60 * 1000,
+    };
+  
+    const [url] = await bucket.file(fileName).getSignedUrl(options);
+    return url;
+  } catch (error) {
+    console.error(`Failed to generate URL for ${part.imageUrl}:`, error.message);
+    return null;
+  }
 };

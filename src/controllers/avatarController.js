@@ -14,7 +14,6 @@ routes.post('/user-avatar', async (req, res) => {
   }
 });
 
-
 routes.get('/categories', async (req, res) => {
   try {
       const categories = await service.getCategories();

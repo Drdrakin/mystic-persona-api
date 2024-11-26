@@ -5,7 +5,7 @@ const AvatarPartSchema = new mongoose.Schema({
   type: { 
     type: String, 
     required: true, 
-    enum: ['head', 'body', 'legs', 'accessories', 'glasses', 'hats'],
+    enum: ['head', 'body', 'legs', 'accessories', 'glasses', 'hats', 'eyes','mouth'],
   },
   imageUrl: { type: String, required: true },
   description: { type: String, required: true },
