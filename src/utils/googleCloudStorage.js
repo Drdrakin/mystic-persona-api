@@ -15,72 +15,75 @@ const storage = new Storage({
 const bucketName = 'mystica-dev';
 const bucket = storage.bucket(bucketName);
 
-export const uploadImage = (file) => {
+async function uploadImage(file) {
   return new Promise((resolve, reject) => {
-      const uniqueFilename = `${uuidv4()}-${file.originalname}`;
-      const blob = bucket.file(uniqueFilename);
+    const uniqueFilename = `${uuidv4()}-${file.originalname}`;
+    const blob = bucket.file(uniqueFilename);
 
-      const blobStream = blob.createWriteStream({
-          resumable: false,
-          contentType: file.mimetype,
-          metadata: {
-              cacheControl: 'public, max-age=31536000'
-          }
+    const blobStream = blob.createWriteStream({
+      resumable: false,
+      contentType: file.mimetype,
+      metadata: {
+        cacheControl: 'no-cache'
+      }
+    });
+
+    blobStream.on('error', (err) => {
+      reject(err);
+    });
+
+    blobStream.on('finish', () => {
+      resolve(uniqueFilename);
+    });
+
+    // Sharp converts and resizes the image for faster loading and to have a consistent pattern.
+    sharp(file.buffer)
+      .resize(200, 200)
+      .toFormat('webp')
+      .toBuffer()
+      .then((data) => {
+        blobStream.end(data);
+      })
+      .catch((err) => {
+        console.error("Sharp image processing failed:", err.message);
+        reject(err);
       });
-
-      blobStream.on('error', (err) => {
-          reject(err);
-      });
-
-      blobStream.on('finish', () => {
-          resolve(uniqueFilename);
-      });
-
-      // Sharp converts and resizes the image for faster loading and to have a 'pattern' of sorts..
-      // webp seems more compatible with web apps
-      sharp(file.buffer)
-          .resize(200, 200)
-          .toFormat('webp')
-          .toBuffer()
-          .then(data => {
-              blobStream.end(data);
-          })
-          .catch(err => {
-              reject(err);
-          });
   });
-};
+}
 
-export const getImageFromCloud = async (fileName) => {
+async function getImage(fileName) {
+
   try {
+
     const file = bucket.file(fileName);
 
     const [exists] = await file.exists();
     if (!exists) {
-      throw new Error("File not found in cloud storage:" + fileName);
+      throw new Error("File not found in cloud storage: " + fileName);
     }
 
-    //Download to use locally
     const [buffer] = await file.download();
 
     return buffer;
   } catch (err) {
-    throw new Error("Error retrieving file from cloud:" + err.message);
+    throw new Error("Error retrieving file from cloud: " + err.message);
   }
-};
+}
 
-export const generateSignedUrl = async (fileName) => {
+async function generateSignedUrl(fileName) {
   try {
     const options = {
       version: 'v4',
       action: 'read',
-      expires: Date.now() + 30 * 60 * 1000,
+      expires: Date.now() + 30 * 60 * 1000, // 30 minutes expiration
     };
-  
+
     const [url] = await bucket.file(fileName).getSignedUrl(options);
     return url;
   } catch (error) {
-    console.error(`Failed to generate URL for ${part.imageUrl}:`, error.message);
+    console.error(`Failed to generate URL for file: ${fileName}`, error.message);
     return null;
   }
-};
+}
+
+export default { getImage, generateSignedUrl, uploadImage }; 

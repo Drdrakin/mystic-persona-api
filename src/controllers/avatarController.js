@@ -1,14 +1,18 @@
 import express from 'express';
 import service from '../services/avatarService.js';
 import upload from '../middleware/fileUpload.js';
-import { uploadImage } from '../utils/googleCloudStorage.js';
+import GCP from '../utils/googleCloudStorage.js';
 
 const routes = express.Router();
 
 routes.post('/user-avatar', async (req, res) => {
   try {
+    if (!req.body.userId) { 
+      return res.status(400).send('User ID is required');
+    }
+
     const savedAvatar = await service.createUserAvatar(req.body);
-    res.status(201).json(savedAvatar);
+    res.status(201).send(savedAvatar);
   } catch (err) {
     res.status(400).send({ message: err.message });
   }
@@ -44,7 +48,7 @@ routes.get('/', async (req, res) => {
 
 routes.post('/', upload.single('image'), async (req, res) => {
   try {
-    const imageUrl = await uploadImage(req.file);
+    const imageUrl = await GCP.uploadImage(req.file);
     const newPart = await service.createAvatarPart({
       ...req.body,
       imageUrl
