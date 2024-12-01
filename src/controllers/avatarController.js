@@ -27,6 +27,18 @@ routes.get('/categories', async (req, res) => {
   }
 });
 
+routes.get('/user-avatar', async (req, res) => {
+
+  const { userId } = req.query;
+
+  try {
+      const avatars = await service.getUserAvatars(userId);
+      res.json(avatars);
+  } catch (err) {
+      res.status(500).send({ message: err.message });
+  }
+});
+
 routes.get('/components', async (req, res) => {
   const { category } = req.query;
   try {

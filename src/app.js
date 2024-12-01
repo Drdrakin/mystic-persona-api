@@ -11,7 +11,7 @@ app.use(express.json());
 connect.connectMongoDB().then(() => {
   app.use('/', routes);
 
-  const PORT = 3333;
+  const PORT = 3000;
 
   app.listen(PORT, () => {
     console.log(`Server running in port ${PORT}`);

@@ -1,12 +1,11 @@
 import User from '../models/User.js';
 import { generateToken } from '../utils/jwtUtils.js';
 
-async function createUser(firstName, lastName, birthday, email, password) {
+async function createUser(firstName, lastName, email, password) {
     try {
         const user = new User({
             firstName,
             lastName,
-            birthday,
             email,
             password,
         });

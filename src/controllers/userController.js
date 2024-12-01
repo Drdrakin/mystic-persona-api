@@ -4,11 +4,11 @@ import service from '../services/userService.js';
 const routes = express.Router();
 
 routes.post('/register', async (req, res) => {
-    const { firstName, lastName, birthday, email, password } = req.body;
+    const { firstName, lastName, email, password } = req.body;
     
     try {
 
-        await service.createUser(firstName, lastName, birthday, email, password);
+        await service.createUser(firstName, lastName, email, password);
         
         return res.status(201).send({ message: 'User succefully created' });
     } catch (err) {

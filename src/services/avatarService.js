@@ -12,7 +12,7 @@ import mongoose from 'mongoose';
 // hypothesis: leverage the canvas html element for processing the element client-side, and process only the positions + the single
 // resulting image, that way I would have an actual grid with coordinates, and would be possible to process tens of componentes per avatar
 // due to integer coordinates being much lightweight than actual buffer binary data.
-// Instead of canvas, it may also be used the 'p5' client-side npm library, which seems to be more refined and easier to implement on top of.
+// Instead of canvas, it could be the 'p5' client-side npm library, which seems to be more refined and easier to implement on top of.
 
 
 async function createUserAvatar(data) {
@@ -20,7 +20,7 @@ async function createUserAvatar(data) {
     const head = data.avatarParts[0];
     const eyes = data.avatarParts[1];
     const mouth = data.avatarParts[2];
-    const userId = data.userId;
+    const userId = new mongoose.Types.ObjectId(data.userId);
 
     // Step 1: Fetch MongoDB data
     const headPart = await AvatarPart.findById(head);
@@ -52,9 +52,10 @@ async function createUserAvatar(data) {
     });
 
     // Step 5: Upload the composed avatar
+    const timestamp = Date.now();
     const composedAvatarFilename = await GCP.uploadImage({
       buffer: composedAvatarBuffer,
-      originalname: 'avatar.png'
+      originalname: `avatar_${userId}_${timestamp}.png`
     });
 
     // Step 6: Generate a signed URL for the uploaded avatar
@@ -166,4 +167,16 @@ async function saveAvatarMetadata(userId, avatarParts, avatarUrl) {
   }
 }
 
-export default { getAvatarParts, createAvatarPart, updateAvatarPart, deleteAvatarPart, getCategories, getComponentsByCategory, createUserAvatar };
+async function getUserAvatars(userId) {
+
+  try {
+    const userAvatars = await UserAvatar.find({ userId });
+
+    return userAvatars;
+  } catch (err) {
+    console.error(`Error retrieving avatars for user ${userId}:`, err);
+    throw new Error(`Error retrieving avatars for user ${userId}`);
+  }
+}
+
+export default { getAvatarParts, createAvatarPart, updateAvatarPart, deleteAvatarPart, getCategories, getComponentsByCategory, createUserAvatar, getUserAvatars };
