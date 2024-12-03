@@ -28,7 +28,6 @@ routes.get('/categories', async (req, res) => {
 });
 
 routes.get('/user-avatar', async (req, res) => {
-
   const { userId } = req.query;
 
   try {
@@ -38,6 +37,46 @@ routes.get('/user-avatar', async (req, res) => {
       res.status(500).send({ message: err.message });
   }
 });
+
+routes.get('/user-avatar/:avatarId', async (req, res) => {
+  const { avatarId } = req.params;
+
+  try {
+      const avatar = await service.getAvatar(avatarId);
+      if (!avatar) {
+        return res.status(404).send({ message: 'Avatar not found' });
+      }
+      res.send(avatar);
+  } catch (err) {
+      console.error('Error fetching avatar:', err);
+      res.status(500).send({ message: err.message });
+  }
+});
+
+
+routes.delete('/user-avatar/:avatarId', async (req, res) => {
+  const avatarId = req.params.avatarId;
+
+  try {
+    const response = await service.deleteUserAvatar(avatarId);
+    res.json(response);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+});
+
+routes.put('/user-avatar/:avatarId', async (req, res) => {
+  const { avatarId } = req.params;
+  const data = { avatarId, ...req.body };
+  
+  try {
+    const response = await service.updateUserAvatar(data);
+    res.json(response);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+});
+
 
 routes.get('/components', async (req, res) => {
   const { category } = req.query;
