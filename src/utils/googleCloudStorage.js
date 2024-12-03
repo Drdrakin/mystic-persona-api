@@ -39,7 +39,7 @@ async function uploadImage(file) {
     // Sharp converts and resizes the image for faster loading and to have a consistent pattern.
     sharp(file.buffer)
       .resize(200, 200)
-      .toFormat('webp')
+      .toFormat('png')
       .toBuffer()
       .then((data) => {
         blobStream.end(data);
